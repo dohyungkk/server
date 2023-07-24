@@ -1,6 +1,7 @@
 const csv = require('csv-parser');
 const fs = require('fs');
 
+// Adding few condition for email/password validation
 const validateUserCredentials = (email, password) => {
     if (email.length === 0) {
         return {
@@ -18,7 +19,7 @@ const validateUserCredentials = (email, password) => {
         }
     }
 
-    // Validate email format
+    // Validating email format
     // Ref: https://www.w3resource.com/javascript/form/email-validation.php
     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)===false) {
         return {
@@ -28,8 +29,6 @@ const validateUserCredentials = (email, password) => {
         }
     }
 
-    // add more or make it a separate file for this f
-
     return {
         result : true
     }
@@ -37,7 +36,7 @@ const validateUserCredentials = (email, password) => {
 
 exports.login = (req, res) => {
     let users = []
-    fs.createReadStream('./users.csv')
+    fs.createReadStream('./Database - Users Table.csv')
     .pipe(csv())
     .on('data', (data) => {
         users.push(data);
@@ -51,8 +50,11 @@ exports.login = (req, res) => {
             })
             return
         }
-        const user = users.find((u) => u.email === email && u.password === password);
-        const isUserFound = !!user;
+        // Validating for matching email and password
+        const user = users.find((u) => u.email === email && u.password === password)
+        
+        // Converting user to a boolean value to ensure that the result is either true or false
+        const isUserFound = !!user
 
         // Check if the provided email and password match the dummy credentials.
         if (isUserFound) {
@@ -60,7 +62,7 @@ exports.login = (req, res) => {
             res.status(200).send({
                 message: 'Login successful!',
 
-                // this can be a JWT token...
+                // Setting a secret_key from string in email
                 secret_key: Buffer.from(email).toString('base64')
             });
         } else {
